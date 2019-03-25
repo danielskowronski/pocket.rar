@@ -1,0 +1,4 @@
+rar_config:
+  port: 9001
+  consumer_key: '--https://getpocket.com/developer/apps/new--'
+  redirect_uri: 'https://.../callback'
