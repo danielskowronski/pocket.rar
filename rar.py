@@ -1,14 +1,9 @@
 #!/usr/bin/python
-import yaml,pocket
-#from var_dump import var_export
+import yaml,pocket,random
 from pocket import Pocket
 from wsgiref.simple_server import make_server
-from tg import MinimalApplicationConfigurator,FullStackApplicationConfigurator
-from tg import expose, TGController
-from tg import session
+from tg import MinimalApplicationConfigurator,FullStackApplicationConfigurator,expose,TGController,session
 from tg.configurator.components.session import SessionConfigurationComponent
-import random
-
 
 def getSessionItemOrEmpty(name):
 	try:
@@ -24,8 +19,29 @@ class RootController(TGController):
 		rt=getSessionItemOrEmpty('request_token')
 		at=getSessionItemOrEmpty('access_token')
 
-		return '<pre>request_token='+rt+';access_token='+at+'\n</pre>'+\
-		'<h1>rar</h1><li><a href="/login">auth</a></li><li><a href="/logout">logout</a></li><li><b><a href="/random">random article</a></b></li>'
+		html='<title>Pocket.RAR</title><style>body{background: #222;color: #eee}a{color:yellow;padding:2px;}a:hover{background:yellow;color:#222}</style><body>'
+
+		html+='<pre>'
+		if rt=='':
+			html+='<span style="color:red"><strike>request_token</strike></span>'
+		else:
+			html+='<span style="color:green">request_token='+rt+'</span>'
+		html+=' '
+		if at=='':
+			html+='<span style="color:red"><strike>access_token</strike></span>'
+		else:
+			html+='<span style="color:green">access_token='+at+'</span>'
+		html+='</pre>'
+
+		html+='<h1>Pocket.RAR</h1>'
+		html+='<li><a href=/random style="font-size:72px">get random article</a></li>'
+		html+='<li><a href=https://github.com/danielskowronski/pocket.rar>github</a></li>'
+		html+='<li><a href=/login>auth to Pocket</a></li>'
+		html+='<li><a href=/logout>delete tokens from browser</a></li>'
+
+		html+='</body>'
+
+		return html
 	
 	@expose(content_type='text/html')
 	def random(self):
@@ -38,7 +54,7 @@ class RootController(TGController):
 		articles=resp[0]['list']
 		cnt=len(articles)
 		trgt=random.randint(0, cnt)
-		##return var_export(articles[articles.keys()[trgt]]['item_id']) ##
+
 		return '<script>window.location.href="https://getpocket.com/a/read/'+articles[articles.keys()[trgt]]['item_id']+'"</script>'
 
 	@expose(content_type='text/html')
