@@ -66,8 +66,11 @@ class RootController(TGController):
 			tags=json.loads(urllib.unquote(request.cookies.get('tags')))
 		except:
 			tags='_untagged_'
-		pocket_instance = pocket.Pocket(rar_config['consumer_key'], at)
-		resp=pocket_instance.get(state='unread',tag=tags)
+		try:
+			pocket_instance = pocket.Pocket(rar_config['consumer_key'], at)
+			resp=pocket_instance.get(state='unread',tag=tags)
+		except Exception,e:
+			return '<h1 style="color: red">'+str(e)
 		articles=resp[0]['list']
 		cnt=len(articles)
 		trgt=random.randint(0, cnt)
@@ -80,8 +83,11 @@ class RootController(TGController):
 		if at=="":
 			return '<script>window.location.replace("/login")</script>'
 
-		pocket_instance = pocket.Pocket(rar_config['consumer_key'], at)
-		resp=pocket_instance.get(state='unread',detailType='complete')
+		try:
+			pocket_instance = pocket.Pocket(rar_config['consumer_key'], at)
+			resp=pocket_instance.get(state='unread',detailType='complete')
+		except Exception,e:
+			return '<h1 style="color: red">'+str(e)
 		articles=resp[0]['list']
 		ai=articles.iteritems()
 
@@ -92,7 +98,7 @@ class RootController(TGController):
 					tags.add(t[0])
 			except:
 				pass
-		html='<body><h1>tags manager</h1> \n'
+		html='<body><h1>tags manager</h1>green ones are included, by default untagged ones are selected<style>li{font-size: large}</style> \n'
 		html+='<script src=https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js></script> \n'
 		html+='<script src=https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js></script> \n'
 		html+='<script>var tags;$(function() { readCookie() }); function readCookie(){ \n'
@@ -110,13 +116,16 @@ class RootController(TGController):
 		html+='}</script> \n'
 		for t in tags:
 			html+='<li>'+t+' <button onClick="toggle(\''+t+'\')">toggle</button></li> \n'
-		html+='<li>__untagged__ <button onClick="toggle(\''+t+'\')">toggle</button></li> \n'
+		html+='<i><li>_untagged_ <button onClick="toggle(\'_untagged_\')">toggle</button></li></i> \n'
 
 		return html
 
 	@expose(content_type='text/html')
 	def callback(self,*args):
-		user_credentials = Pocket.get_credentials(consumer_key=rar_config['consumer_key'], code=session['request_token'])
+		try:
+			user_credentials = Pocket.get_credentials(consumer_key=rar_config['consumer_key'], code=session['request_token'])
+		except Exception,e:
+			return '<h1 style="color: red">'+str(e)
 		access_token = user_credentials['access_token']
 		session['access_token']=access_token
 		session.save()
@@ -124,10 +133,16 @@ class RootController(TGController):
 
 	@expose(content_type='text/html')
 	def login(self):
-		request_token = Pocket.get_request_token(consumer_key=rar_config['consumer_key'], redirect_uri=rar_config['redirect_uri'])
+		try:
+			request_token = Pocket.get_request_token(consumer_key=rar_config['consumer_key'], redirect_uri=rar_config['redirect_uri'])
+		except Exception,e:
+			return '<h1 style="color: red">'+str(e)
 		session['request_token']=request_token
 		session.save()
-		auth_url = Pocket.get_auth_url(code=request_token, redirect_uri=rar_config['redirect_uri'])
+		try:
+			auth_url = Pocket.get_auth_url(code=request_token, redirect_uri=rar_config['redirect_uri'])
+		except Exception,e:
+			return '<h1 style="color: red">'+str(e)	
 		return '<script>window.location.replace("'+auth_url+'")</script>'
 
 	@expose(content_type='text/html')
