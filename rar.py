@@ -68,12 +68,14 @@ class RootController(TGController):
 			tags='_untagged_'
 		try:
 			pocket_instance = pocket.Pocket(rar_config['consumer_key'], at)
-			resp=pocket_instance.get(state='unread',tag=tags)
+			articles=dict()
+			for tag in tags:
+				resp=pocket_instance.get(state='unread',tag=tag)
+				articles.update(resp[0]['list'])
 		except Exception,e:
 			return '<h1 style="color: red">'+str(e)
-		articles=resp[0]['list']
 		cnt=len(articles)
-		trgt=random.randint(0, cnt)
+		trgt=random.randint(0, cnt-1)
 
 		return '<script>window.location.href="https://getpocket.com/a/read/'+articles[articles.keys()[trgt]]['item_id']+'"</script>'
 
