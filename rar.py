@@ -45,7 +45,7 @@ class RootController(TGController):
 		html+='</pre>'
 
 		html+='<h1>Pocket.RAR</h1>'
-		html+='<li><a href=/random style="font-size:72px">get random article</a></li>'
+		html+='<li><a href=/random style="font-size:48px">get random article</a></li>'
 		html+='<li><a href=/tags>manage tags</a></li>'
 		html+='<li><a href=/login>auth to Pocket</a></li>'
 		html+='<li><a href=/logout>delete tokens from browser</a></li>'
@@ -65,18 +65,22 @@ class RootController(TGController):
 		try:
 			tags=json.loads(urllib.unquote(request.cookies.get('tags')))
 		except:
-			tags='_untagged_'
+			tags=['_untagged_']
+		if len(tags)==0:
+			tags=['_untagged_']
 		try:
 			pocket_instance = pocket.Pocket(rar_config['consumer_key'], at)
 			articles=dict()
 			for tag in tags:
-				resp=pocket_instance.get(state='unread',tag=tag)
+				resp=pocket_instance.get(state='unread',tag=tag,is_article=True)
 				articles.update(resp[0]['list'])
 		except Exception,e:
 			return '<h1 style="color: red">'+str(e)
 		cnt=len(articles)
-		trgt=random.randint(0, cnt-1)
+		if cnt==0:
+			return '<h1>No articles :('
 
+		trgt=random.randint(0, cnt-1)
 		return '<script>window.location.href="https://getpocket.com/a/read/'+articles[articles.keys()[trgt]]['item_id']+'"</script>'
 
 	@expose(content_type='text/html')
