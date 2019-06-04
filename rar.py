@@ -30,7 +30,7 @@ class RootController(TGController):
 		rt=getSessionItemOrEmpty('request_token')
 		at=getSessionItemOrEmpty('access_token')
 
-		html='<title>Pocket.RAR</title><style>body{background: #222;color: #eee}a{color:yellow;padding:2px;}a:hover{background:yellow;color:#222}</style><body>'
+		html='<title>Pocket.RAR</title><style>body{background: #222;color: #eee;font-size:36px;}a{color:yellow;padding:2px;}a:hover{background:yellow;color:#222}</style><body>'
 
 		html+='<pre>'
 		if rt=='':
@@ -45,7 +45,7 @@ class RootController(TGController):
 		html+='</pre>'
 
 		html+='<h1>Pocket.RAR</h1>'
-		html+='<li><a href=/random style="font-size:48px">get random article</a></li>'
+		html+='<li><a href=/random style="font-size:72px">get random article</a></li>'
 		html+='<li><a href=/tags>manage tags</a></li>'
 		html+='<li><a href=/login>auth to Pocket</a></li>'
 		html+='<li><a href=/logout>delete tokens from browser</a></li>'
@@ -78,7 +78,7 @@ class RootController(TGController):
 			return '<h1 style="color: red">'+str(e)
 		cnt=len(articles)
 		if cnt==0:
-			return '<h1>No articles :('
+			return '<h1>No articles :(<br /><button onClick="document.cookie=\'tags=\'">clear tags filter</button>'
 
 		trgt=random.randint(0, cnt-1)
 		return '<script>window.location.href="https://getpocket.com/a/read/'+articles[articles.keys()[trgt]]['item_id']+'"</script>'
@@ -123,6 +123,7 @@ class RootController(TGController):
 		for t in tags:
 			html+='<li>'+t+' <button onClick="toggle(\''+t+'\')">toggle</button></li> \n'
 		html+='<i><li>_untagged_ <button onClick="toggle(\'_untagged_\')">toggle</button></li></i> \n'
+		html+='<br /><br /><button onClick="document.cookie=\'tags=\'">clear tags filter</button>'
 
 		return html
 
