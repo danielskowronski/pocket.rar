@@ -81,7 +81,7 @@ class RootController(TGController):
 			return '<h1>No articles :(<br /><button onClick="document.cookie=\'tags=\'">clear tags filter</button>'
 
 		trgt=random.randint(0, cnt-1)
-		return '<script>window.location.href="https://getpocket.com/a/read/'+articles[articles.keys()[trgt]]['item_id']+'"</script>'
+		return '<script>window.location.href="https://app.getpocket.com/read/'+articles[articles.keys()[trgt]]['item_id']+'"</script>'
 
 	@expose(content_type='text/html')
 	def tags(self,*args):
