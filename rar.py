@@ -72,13 +72,17 @@ class RootController(TGController):
 			pocket_instance = pocket.Pocket(rar_config['consumer_key'], at)
 			articles=dict()
 			for tag in tags:
-				resp=pocket_instance.get(state='unread',tag=tag,is_article=True)
+				resp=pocket_instance.get(state='unread',tag=tag,contentType='article')
 				articles.update(resp[0]['list'])
 		except Exception,e:
 			return '<h1 style="color: red">'+str(e)
 		cnt=len(articles)
 		if cnt==0:
 			return '<h1>No articles :(<br /><button onClick="document.cookie=\'tags=\'">clear tags filter</button>'
+
+		f = open("/tmp/rar_last.json", "w")
+		f.write(json.dumps(articles))
+		f.close()
 
 		trgt=random.randint(0, cnt-1)
 		return '<script>window.location.href="https://app.getpocket.com/read/'+articles[articles.keys()[trgt]]['item_id']+'"</script>'
