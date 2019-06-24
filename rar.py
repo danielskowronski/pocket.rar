@@ -45,15 +45,15 @@ class RootController(TGController):
 		html+='</pre>'
 
 		html+='<h1>Pocket.RAR</h1>'
-		html+='<li><a href=/random style="font-size:72px">get random article</a></li>'
+		html+='<li><a href=/random style="font-size:82px">get random article</a></li>'
 		html+='<li><a href=/tags>manage tags</a></li>'
 		html+='<li><a href=/login>auth to Pocket</a></li>'
 		html+='<li><a href=/logout>delete tokens from browser</a></li>'
 		html+='<br />'
 		html+='<li><a href=https://github.com/danielskowronski/pocket.rar>github</a></li>'
 
+		html+='<script>if (localStorage.getItem("last_cnt")) document.write("<br /><br /><li>Last articles count: "+localStorage.getItem("last_cnt")+"</li>");</script>'
 		html+='</body>'
-
 		return html
 	
 	@expose(content_type='text/html')
@@ -85,7 +85,7 @@ class RootController(TGController):
 		f.close()
 
 		trgt=random.randint(0, cnt-1)
-		return '<script>window.location.href="https://app.getpocket.com/read/'+articles[articles.keys()[trgt]]['item_id']+'"</script>'
+		return '<script>localStorage.setItem("last_cnt","'+str(cnt)+'");window.location.href="https://app.getpocket.com/read/'+articles[articles.keys()[trgt]]['item_id']+'"</script>'
 
 	@expose(content_type='text/html')
 	def tags(self,*args):
