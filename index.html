@@ -1,0 +1,150 @@
+<!doctype html>
+<html>
+<head>
+	<title>Pocket.RAR</title>
+	<style>
+		body{
+			background: #222;
+			color: #eee;
+			font-size:36px;
+		}
+		a{
+			color:yellow;
+			padding:2px;
+		}
+		a:hover{
+			background:yellow;
+			color:#222
+		}
+	</style>
+	<script src=https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js></script> 
+	<script src=https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js></script> 
+	<script>
+		var tags;
+		$(function() { 
+			//readCookie() 
+		}); 
+		function readCookie(){ 
+			if (!$.cookie("tags")) 
+				$.cookie("tags", "[]") 
+
+			tags=JSON.parse($.cookie("tags"));
+			$("#tagList li").each(function(){ 
+				t=$(this).html().split(" <")[0]; 
+				console.log(t)
+				if (tags.includes(t)) 
+					$(this).css("color","green"); 
+				else 
+					$(this).css("color","red"); 
+			}) 
+		} 
+		function arrayRemove(arr, value) {
+			return arr.filter(function(ele){return ele != value;});
+		} 
+		function toggle(tag){ 
+			if (!tags.includes(tag)) tags.push(tag); else tags=arrayRemove(tags,tag); 
+				$.cookie("tags", JSON.stringify(tags)); readCookie(); 
+		}
+	</script> 
+</head>
+<body>
+	<h1>Pocket.RAR</h1>
+
+	<li><a href=/random style="font-size:82px">get random article</a></li>
+	<li><a href=# id=myBtn>manage tags</a></li>
+	<li><a href=/login>auth to Pocket</a></li>
+	<li><a href=/logout>delete tokens from browser</a></li>
+	<br /><br />
+
+	<script>
+		if (localStorage.getItem("last_cnt")) 
+			document.write("<li>Last articles count: "+
+				localStorage.getItem("last_cnt")+"</li>");
+		if (localStorage.getItem("last_id")) 
+			document.write("<li>Last read article: "+
+				"<a href='https://app.getpocket.com/read/"+
+					localStorage.getItem("last_id")+
+				"'>"+localStorage.getItem("last_title")+"</a>"
+			);
+	</script>
+
+	<div id="myModal" class="modal">
+		<div class="modal-content">
+			<span class="close">&times;</span>
+			<h2>Tags manager</h2>
+			Green ones are included, by default untagged ones are selected;
+			<i>norar</i> is always excluded
+			<ul id="tagList"></ul>
+		</div>
+	</div>
+
+	<script>
+		var modal = document.getElementById("myModal");
+		var btn = document.getElementById("myBtn");
+		var span = document.getElementsByClassName("close")[0];
+		btn.onclick = function() {
+			modal.style.display = "block";
+			$.get("/tags", function(data){
+				data.tags.forEach(function(tag) {
+					$("#tagList").append(
+						"<li>"+tag+" <button onClick=\""+
+						"toggle('"+tag+"')\">toggle</button></li> ")
+				})
+				readCookie()
+			})
+		}
+		span.onclick = function() {
+			modal.style.display = "none";
+		}
+		window.onclick = function(event) {
+			if (event.target == modal) {
+				modal.style.display = "none";
+			}
+		}
+	</script>
+
+	<style>
+	/* The Modal (background) */
+	.modal {
+		font-size: 18px;
+		display: none; /* Hidden by default */
+		position: fixed; /* Stay in place */
+		z-index: 1; /* Sit on top */
+		padding-top: 100px; /* Location of the box */
+		left: 0;
+		top: 0;
+		width: 100%; /* Full width */
+		height: 100%; /* Full height */
+		overflow: auto; /* Enable scroll if needed */
+		background-color: rgba(50,50,50,0.9); /* Black w/ opacity */
+	}
+
+	/* Modal Content */
+	.modal-content {
+		background-color: #222;
+		margin: auto;
+		padding: 20px;
+		border: 1px solid #888;
+		width: 80%;
+
+	}
+
+	/* The Close Button */
+	.close {
+		color: #aaaaaa;
+		float: right;
+		font-size: 28px;
+		font-weight: bold;
+	}
+
+	.close:hover,
+	.close:focus {
+		color: #000;
+		text-decoration: none;
+		cursor: pointer;
+	}
+	</style>
+</body>
+</html>
+
+<body></body>

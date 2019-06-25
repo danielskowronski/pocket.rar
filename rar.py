@@ -21,46 +21,23 @@ def getSessionItemOrEmpty(name):
 	try:
 		x=session[name]
 	except:
-		x=""
+		x=''
 	return x
+
+def writeJSRedir(url):
+	return '<script>window.location.replace("'+url+'")</script>'
 
 class RootController(TGController):
 	@expose(content_type='text/html')
 	def index(self):
-		rt=getSessionItemOrEmpty('request_token')
-		at=getSessionItemOrEmpty('access_token')
-
-		html='<title>Pocket.RAR</title><style>body{background: #222;color: #eee;font-size:36px;}a{color:yellow;padding:2px;}a:hover{background:yellow;color:#222}</style><body>'
-
-		html+='<pre>'
-		if rt=='':
-			html+='<span style="color:red"><strike>request_token</strike></span>'
-		else:
-			html+='<span style="color:green">request_token='+rt+'</span>'
-		html+=' '
-		if at=='':
-			html+='<span style="color:red"><strike>access_token</strike></span>'
-		else:
-			html+='<span style="color:green">access_token='+at+'</span>'
-		html+='</pre>'
-
-		html+='<h1>Pocket.RAR</h1>'
-		html+='<li><a href=/random style="font-size:82px">get random article</a></li>'
-		html+='<li><a href=/tags>manage tags</a></li>'
-		html+='<li><a href=/login>auth to Pocket</a></li>'
-		html+='<li><a href=/logout>delete tokens from browser</a></li>'
-		html+='<br />'
-		html+='<li><a href=https://github.com/danielskowronski/pocket.rar>github</a></li>'
-
-		html+='<script>if (localStorage.getItem("last_cnt")) document.write("<br /><br /><li>Last articles count: "+localStorage.getItem("last_cnt")+"</li>");</script>'
-		html+='</body>'
-		return html
+		file = open('./index.html','r') 
+		return file.read()
 	
 	@expose(content_type='text/html')
 	def random(self):
 		at=getSessionItemOrEmpty('access_token')
-		if at=="":
-			return '<script>window.location.replace("/login")</script>'
+		if at=='':
+			return writeJSRedir('/login')
 
 		try:
 			tags=json.loads(urllib.unquote(request.cookies.get('tags')))
@@ -95,7 +72,8 @@ class RootController(TGController):
 
 		cnt=len(articlesToConsider)
 		if cnt==0:
-			return '<h1>No articles :(<br /><button onClick="document.cookie=\'tags=\'">clear tags filter</button>'
+			return '<h1>No articles :(<br />'+\
+			'<button onClick="document.cookie=\'tags=\'">clear tags filter</button>'
 
 		f = open("/tmp/rar_last.json", "w")
 		f.write(json.dumps(articlesToConsider))
@@ -107,14 +85,14 @@ class RootController(TGController):
 			'localStorage.setItem("last_cnt","'+str(cnt)+'");'+\
 			'localStorage.setItem("last_id","'+targetArticle['item_id']+'");'+\
 			'localStorage.setItem("last_title","'+targetArticle['resolved_title']+'");'+\
-			'window.location.href="https://app.getpocket.com/read/'+targetArticle['item_id']+'"'+\
-		'</script>'
+		'</script>'+\
+		writeJSRedir('https://app.getpocket.com/read/'+targetArticle['item_id'])
 
-	@expose(content_type='text/html')
+	@expose(content_type='application/json')
 	def tags(self,*args):
 		at=getSessionItemOrEmpty('access_token')
-		if at=="":
-			return '<script>window.location.replace("/login")</script>'
+		if at=='':
+			return writeJSRedir('/login')
 
 		try:
 			pocket_instance = pocket.Pocket(rar_config['consumer_key'], at)
@@ -131,28 +109,13 @@ class RootController(TGController):
 					tags.add(t[0])
 			except:
 				pass
-		html='<body><h1>tags manager</h1>green ones are included, by default untagged ones are selected; <i>norar</i> is always excluded<style>li{font-size: large}</style> \n'
-		html+='<script src=https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js></script> \n'
-		html+='<script src=https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js></script> \n'
-		html+='<script>var tags;$(function() { readCookie() }); function readCookie(){ \n'
-		html+='  if (!$.cookie("tags")) $.cookie("tags", "[]") \n'
-		html+='  tags=JSON.parse($.cookie("tags")) \n'
-		html+='  $("li").each(function(){ \n'
-		html+='    t=$(this).html().split(" <")[0]; \n'
-		html+='    if (tags.includes(t)) $(this).css("color","green"); else $(this).css("color","red"); \n'
-		html+='  }) \n'
-		html+='} \n'
-		html+='function arrayRemove(arr, value) {return arr.filter(function(ele){return ele != value;});} \n'
-		html+='function toggle(tag){ \n'
-		html+='  if (!tags.includes(tag)) tags.push(tag); else tags=arrayRemove(tags,tag); \n'
-		html+='  $.cookie("tags", JSON.stringify(tags)); readCookie(); \n'
-		html+='}</script> \n'
+		txt ='{"tags": [ '
 		for t in tags:
-			html+='<li>'+t+' <button onClick="toggle(\''+t+'\')">toggle</button></li> \n'
-		html+='<i><li>_untagged_ <button onClick="toggle(\'_untagged_\')">toggle</button></li></i> \n'
-		html+='<br /><br /><button onClick="document.cookie=\'tags=\'">clear tags filter</button>'
-
-		return html
+			if t=='norar':
+				continue
+			txt+='"'+t+'", '
+		txt+='"_untagged_" ]}'
+		return txt
 
 	@expose(content_type='text/html')
 	def callback(self,*args):
@@ -163,7 +126,7 @@ class RootController(TGController):
 		access_token = user_credentials['access_token']
 		session['access_token']=access_token
 		session.save()
-		return '<script>window.location.replace("/index")</script>'
+		return writeJSRedir('/index')
 
 	@expose(content_type='text/html')
 	def login(self):
@@ -177,12 +140,12 @@ class RootController(TGController):
 			auth_url = Pocket.get_auth_url(code=request_token, redirect_uri=rar_config['redirect_uri'])
 		except Exception,e:
 			return '<h1 style="color: red">'+str(e)	
-		return '<script>window.location.replace("'+auth_url+'")</script>'
+		return writeJSRedir(auth_url)
 
 	@expose(content_type='text/html')
 	def logout(self):
 		session.delete()
-		return '<script>window.location.replace("/index")</script>'
+		return writeJSRedir('/index')
 
 config = MinimalApplicationConfigurator()
 config.update_blueprint({
