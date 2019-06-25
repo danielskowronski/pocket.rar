@@ -68,24 +68,47 @@ class RootController(TGController):
 			tags=['_untagged_']
 		if len(tags)==0:
 			tags=['_untagged_']
+		
 		try:
 			pocket_instance = pocket.Pocket(rar_config['consumer_key'], at)
 			articles=dict()
-			for tag in tags:
-				resp=pocket_instance.get(state='unread',tag=tag,contentType='article')
-				articles.update(resp[0]['list'])
+			#for tag in tags: #tag=tag,
+			resp=pocket_instance.get(state='unread',contentType='article',detailType='complete')
+			articles.update(resp[0]['list'])
 		except Exception,e:
 			return '<h1 style="color: red">'+str(e)
-		cnt=len(articles)
+
+		articlesToConsider=dict()
+		for key,article in articles.iteritems():
+			try:
+				articleTags=article['tags']
+			except:
+				articleTags=['_untagged_']
+
+			if 'norar' in articleTags:
+				continue
+			for articleTag in articleTags:
+				for tag in tags:
+					if tag==articleTag:
+						articlesToConsider[key]=article
+						break
+
+		cnt=len(articlesToConsider)
 		if cnt==0:
 			return '<h1>No articles :(<br /><button onClick="document.cookie=\'tags=\'">clear tags filter</button>'
 
 		f = open("/tmp/rar_last.json", "w")
-		f.write(json.dumps(articles))
+		f.write(json.dumps(articlesToConsider))
 		f.close()
 
 		trgt=random.randint(0, cnt-1)
-		return '<script>localStorage.setItem("last_cnt","'+str(cnt)+'");window.location.href="https://app.getpocket.com/read/'+articles[articles.keys()[trgt]]['item_id']+'"</script>'
+		targetArticle=articlesToConsider[articlesToConsider.keys()[trgt]]
+		return '<script>'+\
+			'localStorage.setItem("last_cnt","'+str(cnt)+'");'+\
+			'localStorage.setItem("last_id","'+targetArticle['item_id']+'");'+\
+			'localStorage.setItem("last_title","'+targetArticle['resolved_title']+'");'+\
+			'window.location.href="https://app.getpocket.com/read/'+targetArticle['item_id']+'"'+\
+		'</script>'
 
 	@expose(content_type='text/html')
 	def tags(self,*args):
@@ -108,7 +131,7 @@ class RootController(TGController):
 					tags.add(t[0])
 			except:
 				pass
-		html='<body><h1>tags manager</h1>green ones are included, by default untagged ones are selected<style>li{font-size: large}</style> \n'
+		html='<body><h1>tags manager</h1>green ones are included, by default untagged ones are selected; <i>norar</i> is always excluded<style>li{font-size: large}</style> \n'
 		html+='<script src=https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js></script> \n'
 		html+='<script src=https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js></script> \n'
 		html+='<script>var tags;$(function() { readCookie() }); function readCookie(){ \n'
