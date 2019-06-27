@@ -16,14 +16,14 @@
 			background:yellow;
 			color:#222
 		}
+		#status{
+			color: yellow;
+		}
 	</style>
 	<script src=https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js></script> 
 	<script src=https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js></script> 
 	<script>
 		var tags;
-		$(function() { 
-			//readCookie() 
-		}); 
 		function readCookie(){ 
 			if (!$.cookie("tags")) 
 				$.cookie("tags", "[]") 
@@ -45,28 +45,41 @@
 			if (!tags.includes(tag)) tags.push(tag); else tags=arrayRemove(tags,tag); 
 				$.cookie("tags", JSON.stringify(tags)); readCookie(); 
 		}
+
+		$(function() {
+			$.get("/check", function(data){
+				if (data.ok==true)
+					$("#status").css("color","green").html("connected")
+				else
+					$("#status").css("color","red").html("please login")
+			});
+		});
 	</script> 
 </head>
 <body>
-	<h1>Pocket.RAR</h1>
+	<h1>Pocket.RAR [<span id="status">????</span>]</h1>
 
-	<li><a href=/random style="font-size:82px">get random article</a></li>
-	<li><a href=# id=myBtn>manage tags</a></li>
-	<li><a href=/login>auth to Pocket</a></li>
-	<li><a href=/logout>delete tokens from browser</a></li>
-	<br /><br />
+	<a href=/random style="font-size:96px">get random article</a><br />
+	<a href=# id=myBtn>manage tags</a><br />
 
-	<script>
-		if (localStorage.getItem("last_cnt")) 
-			document.write("<li>Last articles count: "+
-				localStorage.getItem("last_cnt")+"</li>");
-		if (localStorage.getItem("last_id")) 
-			document.write("<li>Last read article: "+
-				"<a href='https://app.getpocket.com/read/"+
-					localStorage.getItem("last_id")+
-				"'>"+localStorage.getItem("last_title")+"</a>"
-			);
-	</script>
+	<br />
+
+	<a href=/login>auth to Pocket</a><br />
+	<a href=/logout>delete tokens from browser</a><br />
+
+	<ul>
+		<script>
+			if (localStorage.getItem("last_cnt")) 
+				document.write("<li>Last articles count: "+
+					localStorage.getItem("last_cnt")+"</li>");
+			if (localStorage.getItem("last_id")) 
+				document.write("<li>Last read article: "+
+					"<a href='https://app.getpocket.com/read/"+
+						localStorage.getItem("last_id")+
+					"'>"+localStorage.getItem("last_title")+"</a>"
+				);
+		</script>
+	</ul>
 
 	<div id="myModal" class="modal">
 		<div class="modal-content">
@@ -84,11 +97,15 @@
 		var span = document.getElementsByClassName("close")[0];
 		btn.onclick = function() {
 			modal.style.display = "block";
+			$("#tagList").html("")
 			$.get("/tags", function(data){
-				data.tags.forEach(function(tag) {
-					$("#tagList").append(
-						"<li>"+tag+" <button onClick=\""+
-						"toggle('"+tag+"')\">toggle</button></li> ")
+				if (data.error==true)
+					$("#tagList").html("<h2 style='color: red'>error occured, maybe you are not logged to pocket?</h2>")
+				else
+					data.tags.forEach(function(tag) {
+						$("#tagList").append(
+							"<li>"+tag+" <button onClick=\""+
+							"toggle('"+tag+"')\">toggle</button></li> ")
 				})
 				readCookie()
 			})
@@ -146,5 +163,3 @@
 	</style>
 </body>
 </html>
-
-<body></body>

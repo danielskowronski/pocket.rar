@@ -89,10 +89,23 @@ class RootController(TGController):
 		writeJSRedir('https://app.getpocket.com/read/'+targetArticle['item_id'])
 
 	@expose(content_type='application/json')
+	def check(self,*args):
+		at=getSessionItemOrEmpty('access_token')
+		if at=='':
+			return '{"ok":false}'
+		try:
+			pocket_instance = pocket.Pocket(rar_config['consumer_key'], at)
+			articles=dict()
+			resp=pocket_instance.get(tag='TagThatDoesNotExist')
+			return '{"ok":true,"confirmation":'+str(len(resp[0]['list']))+'}'
+		except:
+			return '{"ok":false}'
+
+	@expose(content_type='application/json')
 	def tags(self,*args):
 		at=getSessionItemOrEmpty('access_token')
 		if at=='':
-			return writeJSRedir('/login')
+			return '{"error":true}'
 
 		try:
 			pocket_instance = pocket.Pocket(rar_config['consumer_key'], at)
@@ -109,7 +122,7 @@ class RootController(TGController):
 					tags.add(t[0])
 			except:
 				pass
-		txt ='{"tags": [ '
+		txt ='{"error":false, "tags": [ '
 		for t in tags:
 			if t=='norar':
 				continue
