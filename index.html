@@ -43,7 +43,7 @@
 		} 
 		function toggle(tag){ 
 			if (!tags.includes(tag)) tags.push(tag); else tags=arrayRemove(tags,tag); 
-				$.cookie("tags", JSON.stringify(tags)); readCookie(); 
+				$.cookie("tags", JSON.stringify(tags), { expires: 365 }); readCookie(); 
 		}
 
 		$(function() {

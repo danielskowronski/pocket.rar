@@ -72,8 +72,10 @@ class RootController(TGController):
 
 		cnt=len(articlesToConsider)
 		if cnt==0:
-			return '<h1>No articles :(<br />'+\
-			'<button onClick="document.cookie=\'tags=\'">clear tags filter</button>'
+			return '<p style="font-size: 120px">No articles :(</p>'+\
+				'<script>setTimeout(function(){'+\
+				'  window.location.replace("/")'+\
+				'}, 1500);</script>'
 
 		f = open("/tmp/rar_last.json", "w")
 		f.write(json.dumps(articlesToConsider))
