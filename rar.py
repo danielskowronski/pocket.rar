@@ -1,8 +1,8 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 import yaml,json,urllib,pocket,random,sys
 from pocket import Pocket
 from wsgiref.simple_server import make_server
-from tg import MinimalApplicationConfigurator,FullStackApplicationConfigurator,expose,TGController,session,request
+from tg import MinimalApplicationConfigurator,expose,TGController,session,request
 from tg.configurator.components.session import SessionConfigurationComponent
 
 if len(sys.argv)==3:

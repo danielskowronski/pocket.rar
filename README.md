@@ -3,8 +3,12 @@ App for getpocket.com that gets random article in queue, allow skipping specific
 
 ## Setup
 
-### Dependencies
+### Dependencies (pip)
+* pyyaml
+* pocket
 * TurboGears2
+* beaker
+
 
 ### API access
 * https://getpocket.com/developer/apps/new

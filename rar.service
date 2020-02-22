@@ -1,0 +1,14 @@
+[Unit]
+Description=Pocket.RAR
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+WorkingDirectory=/srv/rar
+ExecStart=/srv/rar/rar.py
+
+[Install]
+WantedBy=multi-user.target
