@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 import yaml,json,urllib.request,urllib.parse,urllib.error,pocket,random,sys,html
-from pprint import pprint
 from pocket import Pocket
 from wsgiref.simple_server import make_server
 from tg import MinimalApplicationConfigurator,expose,TGController,session,request
