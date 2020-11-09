@@ -2,7 +2,6 @@
 - hosts: app
   vars:
     home: /srv/rar
-    deploy_key: pa
   tasks:
     - name: Install python-setuptools
       apt:
