@@ -168,7 +168,7 @@ config.update_blueprint({
 })
 config.register(SessionConfigurationComponent)
 stream = open('config.yml', 'r')
-rar_config = yaml.load(stream)['rar_config']
+rar_config = yaml.load(stream, Loader=yaml.SafeLoader)['rar_config']
 print(('Serving on port '+str(rar_config['port'])+'...'))
 httpd = make_server('', rar_config['port'], config.make_wsgi_app())
 httpd.serve_forever()
