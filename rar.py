@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-import yaml,json,urllib.request,urllib.parse,urllib.error,pocket,random,sys
+import yaml,json,urllib.request,urllib.parse,urllib.error,pocket,random,sys,html
 from pprint import pprint
 from pocket import Pocket
 from wsgiref.simple_server import make_server
@@ -116,8 +116,35 @@ class RootController(TGController):
 			if not ttr is None:
 				total_ttr+=ttr
 		return '{"ok":true,"count":%d,"ttr":%d}' % (count, total_ttr)
+	
 
-
+	@expose(content_type='text/html')
+	def articles(self,*args):
+		at=getSessionItemOrEmpty('access_token')
+		pocket_instance = pocket.Pocket(rar_config['consumer_key'], at)
+		articles = pocket_instance.get(state='unread',detailType='complete')[0]['list'].items() #this is dict of dicts ;__;
+		articles_simplified=[]
+		for k,v in articles:
+			ttr=v.get('time_to_read')
+			if ttr is None:
+				ttr=0
+			articles_simplified.append((v.get('resolved_id'),ttr,v.get('resolved_title'),v.get('resolved_url')))
+		articles_sorted = sorted(articles_simplified, key=lambda tup: tup[1])
+		alist=""
+		count = len(articles)
+		total_ttr=0
+		for v in articles_sorted:
+			aid=v[0]#.get('resolved_id')
+			ttr=v[1]#.get('time_to_read')
+			total_ttr+=ttr
+			title=html.escape(v[2])#.get('resolved_title'))
+			url=v[3]#.get('resolved_url')
+			if title is None or title == '':
+				title="[%s]" % (url)
+			alist+=('<tr><td align=right>%d mins</td><td><a href="https://app.getpocket.com/read/%s">%s</a></td><td><a href=%s>real url</a></td></tr>' % ( ttr, aid, title, url))
+		ttr_ftm="%d hrs %d mins" % (total_ttr%60, total_ttr/60)
+		return '<meta charset="utf-8" /><style>td{padding: 5px;</style><h1>Count: %s<br />Time to read: %s</h1>'% (count, ttr_ftm)+\
+			'<table border=1><tr><td>time</td><td>title</td><td>real url</td></tr>%s' % (alist)
 
 	@expose(content_type='application/json')
 	def tags(self,*args):
