@@ -46,6 +46,18 @@
 				$.cookie("tags", JSON.stringify(tags), { expires: 365 }); readCookie(); 
 		}
 
+		function checkCounters(){
+			$.get("/counters", function(data){
+				if (data.ok==true){
+					ttr=(data.ttr%60)+"hrs "+parseInt(data.ttr/60)+"mins"
+					$("#checkCounters").html("Articles: "+data.count+"<br />Time to read: <b>"+ttr+"</b>")
+				}
+				else{
+					alert("error")
+				}
+			});
+		}
+
 		$(function() {
 			$.get("/check", function(data){
 				if (data.ok==true)
@@ -60,10 +72,11 @@
 	<h1>Pocket.RAR [<span id="status">????</span>]</h1>
 
 	<a href=/random style="font-size:96px">get random article</a><br />
-	<a href=# id=myBtn>manage tags</a><br />
-
+	<a href=# onClick=checkCounters() id=checkCounters>check current article count and time to read estimate</a><br />
+	
 	<br />
 
+	<a href=# id=myBtn>manage tags</a><br />
 	<a href=/login>auth to Pocket</a><br />
 	<a href=/logout>delete tokens from browser</a><br />
 

@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 import yaml,json,urllib.request,urllib.parse,urllib.error,pocket,random,sys
+from pprint import pprint
 from pocket import Pocket
 from wsgiref.simple_server import make_server
 from tg import MinimalApplicationConfigurator,expose,TGController,session,request
@@ -104,6 +105,21 @@ class RootController(TGController):
 			return '{"ok":false}'
 
 	@expose(content_type='application/json')
+	def counters(self,*args):
+		at=getSessionItemOrEmpty('access_token')
+		pocket_instance = pocket.Pocket(rar_config['consumer_key'], at)
+		articles = pocket_instance.get(state='unread',detailType='complete')[0]['list'].items()
+		count = len(articles)
+		total_ttr=0
+		for k,v in articles:
+			ttr=v.get('time_to_read')
+			if not ttr is None:
+				total_ttr+=ttr
+		return '{"ok":true,"count":%d,"ttr":%d}' % (count, total_ttr)
+
+
+
+	@expose(content_type='application/json')
 	def tags(self,*args):
 		at=getSessionItemOrEmpty('access_token')
 		if at=='':
@@ -141,6 +157,7 @@ class RootController(TGController):
 		access_token = user_credentials['access_token']
 		session['access_token']=access_token
 		session.save()
+		print("ACCESS_TOKEN=%s"%(access_token))
 		return writeJSRedir('/index')
 
 	@expose(content_type='text/html')
@@ -155,6 +172,9 @@ class RootController(TGController):
 			auth_url = Pocket.get_auth_url(code=request_token, redirect_uri=rar_config['redirect_uri'])
 		except Exception as e:
 			return '<h1 style="color: red">'+str(e)	
+
+		print("REQUEST_TOKEN= %s"%(request_token))
+
 		return writeJSRedir(auth_url)
 
 	@expose(content_type='text/html')
