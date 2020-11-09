@@ -1,5 +1,5 @@
-#!/usr/bin/python2
-import yaml,json,urllib,pocket,random,sys
+#!/usr/bin/python3
+import yaml,json,urllib.request,urllib.parse,urllib.error,pocket,random,sys
 from pocket import Pocket
 from wsgiref.simple_server import make_server
 from tg import MinimalApplicationConfigurator,expose,TGController,session,request
@@ -40,7 +40,7 @@ class RootController(TGController):
 			return writeJSRedir('/login')
 
 		try:
-			tags=json.loads(urllib.unquote(request.cookies.get('tags')))
+			tags=json.loads(urllib.parse.unquote(request.cookies.get('tags')))
 		except:
 			tags=['_untagged_']
 		if len(tags)==0:
@@ -52,11 +52,11 @@ class RootController(TGController):
 			#for tag in tags: #tag=tag,
 			resp=pocket_instance.get(state='unread',contentType='article',detailType='complete')
 			articles.update(resp[0]['list'])
-		except Exception,e:
+		except Exception as e:
 			return '<h1 style="color: red">'+str(e)
 
 		articlesToConsider=dict()
-		for key,article in articles.iteritems():
+		for key,article in articles.items():
 			try:
 				articleTags=article['tags']
 			except:
@@ -82,7 +82,7 @@ class RootController(TGController):
 		f.close()
 
 		trgt=random.randint(0, cnt-1)
-		targetArticle=articlesToConsider[articlesToConsider.keys()[trgt]]
+		targetArticle=articlesToConsider[list(articlesToConsider.keys())[trgt]]
 		return '<script>'+\
 			'localStorage.setItem("last_cnt","'+str(cnt)+'");'+\
 			'localStorage.setItem("last_id","'+targetArticle['item_id']+'");'+\
@@ -112,15 +112,15 @@ class RootController(TGController):
 		try:
 			pocket_instance = pocket.Pocket(rar_config['consumer_key'], at)
 			resp=pocket_instance.get(state='unread',detailType='complete')
-		except Exception,e:
+		except Exception as e:
 			return '<h1 style="color: red">'+str(e)
 		articles=resp[0]['list']
-		ai=articles.iteritems()
+		ai=iter(articles.items())
 
 		tags=set()
 		for k,a in ai:
 			try:
-				for t in a['tags'].items():
+				for t in list(a['tags'].items()):
 					tags.add(t[0])
 			except:
 				pass
@@ -136,7 +136,7 @@ class RootController(TGController):
 	def callback(self,*args):
 		try:
 			user_credentials = Pocket.get_credentials(consumer_key=rar_config['consumer_key'], code=session['request_token'])
-		except Exception,e:
+		except Exception as e:
 			return '<h1 style="color: red">'+str(e)
 		access_token = user_credentials['access_token']
 		session['access_token']=access_token
@@ -147,13 +147,13 @@ class RootController(TGController):
 	def login(self):
 		try:
 			request_token = Pocket.get_request_token(consumer_key=rar_config['consumer_key'], redirect_uri=rar_config['redirect_uri'])
-		except Exception,e:
+		except Exception as e:
 			return '<h1 style="color: red">'+str(e)
 		session['request_token']=request_token
 		session.save()
 		try:
 			auth_url = Pocket.get_auth_url(code=request_token, redirect_uri=rar_config['redirect_uri'])
-		except Exception,e:
+		except Exception as e:
 			return '<h1 style="color: red">'+str(e)	
 		return writeJSRedir(auth_url)
 
@@ -169,6 +169,6 @@ config.update_blueprint({
 config.register(SessionConfigurationComponent)
 stream = open('config.yml', 'r')
 rar_config = yaml.load(stream)['rar_config']
-print('Serving on port '+str(rar_config['port'])+'...')
+print(('Serving on port '+str(rar_config['port'])+'...'))
 httpd = make_server('', rar_config['port'], config.make_wsgi_app())
 httpd.serve_forever()
