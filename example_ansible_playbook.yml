@@ -1,0 +1,36 @@
+---
+- hosts: app
+  vars:
+    home: /srv/rar
+    deploy_key: pa
+  tasks:
+    - name: Install python-setuptools
+      apt:
+        name: 
+          - python3-setuptools
+          - python3-pip
+    - name: Deploy Pocket.RAR
+      git:
+        repo: https://github.com/danielskowronski/pocket.rar.git
+        dest: '{{home}}'
+        force: true
+    - name: Deploy Pocket.RAR dependencies
+      pip:
+        executable: pip3
+        requirements: '{{home}}/requirements.txt'
+    - name: Deploy Pocket.RAR config
+      template:
+        src: rar.config.yml
+        dest: '{{home}}/config.yml'
+        mode: '0755'
+    - name: Deploy service file
+      file:
+        state: link
+        src: '{{home}}/rar.service'
+        dest: /lib/systemd/system/rar.service
+    - name: Deploy service file
+      shell: systemctl daemon-reload
+    - name: Enable service
+      service:
+        name: rar
+        state: restarted
