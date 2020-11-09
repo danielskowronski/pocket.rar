@@ -141,7 +141,7 @@ class RootController(TGController):
 			if title is None or title == '':
 				title="[%s]" % (url)
 			alist+=('<tr><td align=right>%d mins</td><td><a href="https://app.getpocket.com/read/%s">%s</a></td><td><a href=%s>real url</a></td></tr>' % ( ttr, aid, title, url))
-		ttr_ftm="%d hrs %d mins" % (total_ttr%60, total_ttr/60)
+		ttr_ftm="%d hrs %d mins" % (total_ttr/60, total_ttr%60)
 		return '<meta charset="utf-8" /><style>td{padding: 5px;</style><h1>Count: %s<br />Time to read: %s</h1>'% (count, ttr_ftm)+\
 			'<table border=1><tr><td>time</td><td>title</td><td>real url</td></tr>%s' % (alist)
 

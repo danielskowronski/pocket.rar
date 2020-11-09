@@ -49,7 +49,7 @@
 		function checkCounters(){
 			$.get("/counters", function(data){
 				if (data.ok==true){
-					ttr=(data.ttr%60)+"hrs "+parseInt(data.ttr/60)+"mins"
+					ttr=parseInt(data.ttr/60)+"hrs "+parseInt(data.ttr%60)+"mins"
 					$("#checkCounters").html("Articles: "+data.count+"<br />Time to read: <b>"+ttr+"</b>")
 				}
 				else{
