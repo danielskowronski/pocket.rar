@@ -127,7 +127,7 @@ class RootController(TGController):
 			ttr=v.get('time_to_read')
 			if ttr is None:
 				ttr=0
-			articles_simplified.append((v.get('resolved_id'),ttr,v.get('resolved_title'),v.get('resolved_url')))
+			articles_simplified.append((k,ttr,v.get('resolved_title'),v.get('resolved_url')))
 		articles_sorted = sorted(articles_simplified, key=lambda tup: tup[1])
 		alist=""
 		count = len(articles)
