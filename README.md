@@ -1,3 +1,6 @@
+# Project replaced with https://github.com/danielskowronski/pocket-plus-plus/
+
+---
 # Pocket.RAR - Pocket Random Article Retriever
 App for getpocket.com that gets random article in queue, allow skipping specific tags
 
